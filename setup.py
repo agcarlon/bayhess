@@ -12,6 +12,8 @@ with open('LICENSE') as f:
 with open('REQUIREMENTS') as f:
     requirements = f.read()
 
+with open('VERSION') as f:
+    version = f.read()
 
 classifiers=[  # Optional
         'Development Status :: 4 - Beta',
@@ -32,7 +34,7 @@ classifiers=[  # Optional
 
 setup(
     name='bayhess',
-    version='0.1.1',
+    version=version,
     description='Bayesian Hessian Approximation for Stochastic Optimization',
     long_description_content_type="text/x-rst",
     long_description=readme,
@@ -46,10 +48,5 @@ setup(
                     'sphinx>=1.3.1',
                     'sphinx_rtd_theme>=0.1.7'],
     packages=find_packages(exclude=('tests', 'docs')),
-    url='https://bitbucket.org/agcarlon/bayhess',
-    # project_urls={  # Optional
-    #     'Documentation': 'https://mice.readthedocs.io/',
-    #     'Source': 'https://bitbucket.org/agcarlon/mice',
-    #     'Manuscript': 'https://arxiv.org/abs/2011.01718'
-    # },
+    url='https://github.com/agcarlon/bayhess',
 )

@@ -1,7 +1,10 @@
 import numpy as np
 
 
-class CGLinear():
+class CGLinear:
+    """
+    Conjugate Gradient method to solve matrix linear systems
+    """
     def __init__(self, print_func=print):
         self.exit_flag = False
         self.print = print_func

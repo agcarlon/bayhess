@@ -4,6 +4,10 @@ from scipy.linalg import eigvalsh
 
 
 class Distribution:
+    """
+    Base class of distributions. It implements the combination of distributions
+    used to define prior and likelihood distributions.
+    """
     def __init__(self, log_pdf, grad_log_pdf, hess_log_pdf_action,
                  hess_log_pdf, secant_flag=False):
         self.log_pdf = log_pdf
@@ -43,7 +47,7 @@ class Distribution:
 
 class FrobeniusReg(Distribution):
     '''
-    Class of FrobeniusReg distributions
+    Class of FrobeniusReg distribution for the prior of the Hessian
     '''
 
     def __init__(self, mean, weights):
@@ -92,7 +96,7 @@ class FrobeniusReg(Distribution):
 
 class Wishart(Distribution):
     '''
-    Class of Wishart distributions
+    Class of Wishart distribution for the prior of the Hessian
     '''
 
     def __init__(self, scale, dof):
@@ -143,6 +147,10 @@ class Wishart(Distribution):
 
 
 class Secant(Distribution):
+    """
+    Class of distributions of the likelihood of a Hessian given
+    curvature pairs using the secant equations.
+    """
     def __init__(self, sk, yk, pk):
         self.sk = sk
         self.yk = yk
@@ -197,6 +205,10 @@ class Secant(Distribution):
 
 
 class SecantInverse(Distribution):
+    """
+    Class of distributions of the likelihood of an inverse Hessian given
+    curvature pairs using the secant equations.
+    """
     def __init__(self, sk, yk, pk):
         self.sk = sk
         self.yk = yk
@@ -259,6 +271,12 @@ class SecantInverse(Distribution):
 
 
 class LogBarrier(Distribution):
+    """
+    Distribution of the prior distribution of a Hessian given constraints on
+    the eigenvalues, i.e., the probability of a Hessian goes to zero as its
+    determinant approaches lower and upper bounds. It is supported on the
+    space of matrices with eigenvalues between the given limits.
+    """
     def __init__(self, lower, upper, penal):
         self.lower = lower
         self.upper = upper
@@ -310,45 +328,6 @@ class LogBarrier(Distribution):
         hess_g = (
                          hess_g + np.transpose(hess_g, (0, 1, 3, 2))) / 2
         return hess_g
-
-
-class DeterminantConstr():
-    def __init__(self, lower, upper):
-        self.lower = lower
-        self.upper = upper
-        self.num_const = 2
-
-    def __call__(self, hess):
-        n_dim = len(hess)
-        g = np.zeros(2)
-        g[0] = np.linalg.det(hess - self.lower * np.eye(n_dim))
-        g[1] = np.linalg.det(self.upper * np.eye(n_dim) - hess)
-        return g
-
-    def grad(self, hess):
-        n_dim = len(hess)
-        diff_g = [np.linalg.inv(hess - self.lower * np.eye(n_dim))
-                  * np.linalg.det(hess - self.lower * np.eye(n_dim))]
-        diff_g.append(- np.linalg.inv(self.upper * np.eye(n_dim) - hess)
-                      * np.linalg.det(self.upper * np.eye(n_dim) - hess))
-        return np.array(diff_g)
-
-    def hess_action(self, hess, direc):
-        n_dim = len(hess)
-        inv_l = np.linalg.inv(hess - self.lower * np.eye(n_dim))
-        det_l = np.linalg.det(hess - self.lower * np.eye(n_dim))
-        inv_u = np.linalg.inv(self.upper * np.eye(n_dim) - hess)
-        det_u = np.linalg.det(self.upper * np.eye(n_dim) - hess)
-
-        action = [-(inv_l @ direc @ inv_l) * det_l
-                  + ((inv_l * direc).sum() * det_l) * inv_l]
-        action.append(-(inv_u @ direc @ inv_u) * det_u
-                      + ((inv_u * direc).sum() * det_u) * inv_u)
-        return np.array(action)
-
-    def hess(self, hess):
-        raise Exception('The Hessian of the log pdf of the Determinant '
-                        'constraint class has not been implemented yet')
 
 
 def test_derivatives(objf, grad, n_dim, n_out=1):
@@ -522,21 +501,9 @@ def test_log_barrier():
     test_hess_(logbarr.hess_log_pdf, logbarr.hess_log_pdf_action, n_dim)
 
 
-def test_det_constr():
-    print('Testing DeterminantConstr class derivatives')
-    np.random.seed(0)
-    n_dim = 3
-    lower = 1e-4
-    upper = 1.
-    constr = DeterminantConstr(lower=lower, upper=upper)
-    test_derivatives(constr, constr.grad, n_dim, n_out=2)
-    test_hess_act(constr.grad, constr.hess_action, n_dim)
-
-
 if __name__ == '__main__':
     test_regularizer()
     test_wishart()
     test_secant()
     test_secant_inv()
     test_log_barrier()
-    test_det_constr()
