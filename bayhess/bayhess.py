@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.linalg import norm
-from IPython.core.debugger import set_trace
 from functools import partial
 from .distributions import FrobeniusReg, Secant, LogBarrier, Wishart
 from .cg import CGLinear
@@ -329,7 +328,7 @@ class BayHess:
             inv = 2 * inv - inv @ self.hess @ inv
             res_ = norm(inv @ self.hess - np.eye(self.n_dim))
             if np.isnan(inv).any() or np.isnan(res):
-                set_trace()
+                raise ValueError("Inverse computation did not converge.")
             if res_ >= res:
                 inv = np.eye(self.n_dim) * 2 / (self.strong_conv + self.smooth)
                 res = norm(inv @ self.hess - np.eye(self.n_dim))
