@@ -49,4 +49,9 @@ setup(
                     'sphinx_rtd_theme>=0.1.7'],
     packages=find_packages(exclude=('tests', 'docs')),
     url='https://github.com/agcarlon/bayhess',
+    project_urls={  # Optional
+        'Documentation': 'https://bayhess.readthedocs.io/',
+        'Source': 'https://github.com/agcarlon/bayhess',
+        'Manuscript': 'https://arxiv.org/abs/2208.00441'
+    },
 )
