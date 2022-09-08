@@ -380,7 +380,7 @@ we can perform optimization using SGD-MICE-Bay.
 
     while True:
         grad = df_.evaluate(x)
-        bay.update_curv_pairs_mice(df_, x)
+        bay.update_curv_pairs_mice(df_)
         if not df_.k % 3:
             bay.find_hess()
         if df_.terminate:

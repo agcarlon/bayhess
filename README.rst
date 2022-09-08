@@ -5,6 +5,14 @@ The BayHess package uses noisy curvature pairs (noisy gradient differences compu
 
 For a detailed description of the method, convergence analysis and numerical results, check our `manuscript`_ named "Approximating Hessian matrices using Bayesian inference: a new approach for quasi-Newton methods in stochastic optimization". This package can be used with the `MICE`_ estimator.
 
+A BayHess object is created by giving the dimensionality of the problem, and lower and upper bounds of the eigenvalues of the Hessian; i.e., strong convexity and smoothness parameters.
+
+    bay = BayHess(n_dim=10, strong_conv=1e-3, smooth=1e4)
+
+Curvature information is passed using the 'update_curv_pairs' method
+
+    bay.update_curv_pairs(sk, yk)
+
 Install BayHess fro PyPI as
 
     pip install bayhess
@@ -12,6 +20,11 @@ Install BayHess fro PyPI as
 A repository with numerical examples can be found at
 
 https://github.com/agcarlon/bayhess_numerics
+
+The documentation of the BayHess package is available at
+
+https://bayhess.readthedocs.io/
+
 
 
 

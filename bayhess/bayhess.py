@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
 from functools import partial
-from .distributions import FrobeniusReg, Secant, SecantInverse, LogBarrier, Wishart
+from .distributions import FrobeniusReg, Secant, SecantInverse, LogBarrier, \
+    Wishart
 from .cg import CGLinear
 from .newton import Newton
 
@@ -123,7 +124,6 @@ class BayHess:
         self.sigma_constant = sigma_constant
         self.check_curv_error = check_curv_error
         self.prior = prior
-        self.xk = []
         self.yk = []
         self.sk = []
         self.pk_raw = []
@@ -131,7 +131,6 @@ class BayHess:
         self.yk_all = []
         self.sk_all = []
         self.pk_all = []
-        self.xk_all = []
         self.eps_yk = eps_yk
 
     def find_hess(self):
@@ -195,7 +194,7 @@ class BayHess:
         x_ = opt(act_x, b, np.zeros(b.shape), tol=tol)
         return x_
 
-    def update_curv_pairs(self, sk, yk, xk):
+    def update_curv_pairs(self, sk, yk):
         """
         Update the curvature pairs
 
@@ -205,9 +204,7 @@ class BayHess:
             Difference of points on space where the gradients are computed
         yk : 2-d array_like
             Array with sample of gradient differences. Shape should be
-            (sample_size, dimensions).
-        xk : array_like
-            Current iterate
+            (sample_size, dimensions)
         """
         if self.finite:
             sigma = np.var(yk, axis=0, ddof=1).sum() / len(yk) \
@@ -222,14 +219,12 @@ class BayHess:
             self.sk.append(sk)
             self.yk.append(yk.mean(axis=0))
             self.pk_raw.append(pk_k)
-            self.xk.append(xk - sk / 2)
             self.update_hess_flag = True
             self.sk = self.sk[-self.pairs_to_use:]
             self.yk = self.yk[-self.pairs_to_use:]
-            self.xk = self.xk[-self.pairs_to_use:]
             self.pk_raw = self.pk_raw[-self.pairs_to_use:]
 
-    def update_curv_pairs_mice(self, df, xk):
+    def update_curv_pairs_mice(self, df):
         """
         Update the curvature pairs from MICE object
 
@@ -238,8 +233,6 @@ class BayHess:
         df : MICE object
             Instance of MICE used to compute the gradients. Curvature pairs
             are extracted from gradient differences at MICE hierarchy.
-        xk : array_like
-            Current iterate
         """
         for delta in df.deltas[1:]:
             if self.finite:
@@ -252,7 +245,6 @@ class BayHess:
                     self.sk_all.append(delta.x_l - delta.x_l1)
                     self.yk_all.append(None)
                     self.pk_all.append(None)
-                    self.xk_all.append((delta.x_l + delta.x_l1) / 2)
                     delta.curv_pair = len(self.sk_all) - 1
                 if self.check_curv_error:
                     self._check_mice_curv_error(delta, df)
@@ -263,7 +255,6 @@ class BayHess:
                 self.update_hess_flag = True
         self.sk = self.sk_all[-self.pairs_to_use:]
         self.yk = self.yk_all[-self.pairs_to_use:]
-        self.xk = self.xk_all[-self.pairs_to_use:]
         self.pk_raw = self.pk_all[-self.pairs_to_use:]
 
     def _check_mice_curv_error(self, delta, df):
