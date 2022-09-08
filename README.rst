@@ -7,15 +7,19 @@ For a detailed description of the method, convergence analysis and numerical res
 
 A BayHess object is created by giving the dimensionality of the problem, and lower and upper bounds of the eigenvalues of the Hessian; i.e., strong convexity and smoothness parameters.
 
-    bay = BayHess(n_dim=10, strong_conv=1e-3, smooth=1e4)
+>>> bay = BayHess(n_dim=10, strong_conv=1e-3, smooth=1e4)
 
 Curvature information is passed using the 'update_curv_pairs' method
 
-    bay.update_curv_pairs(sk, yk)
+>>> bay.update_curv_pairs(sk, yk)
+
+And, finally, computing the Hessian approximation is done by
+
+>>> hess = bay.find_hess()
 
 Install BayHess fro PyPI as
 
-    pip install bayhess
+>>> pip install bayhess
 
 A repository with numerical examples can be found at
 
