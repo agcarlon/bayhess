@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import norm
 from functools import partial
-from .distributions import FrobeniusReg, Secant, LogBarrier, Wishart
+from .distributions import FrobeniusReg, Secant, SecantInverse, LogBarrier, Wishart
 from .cg import CGLinear
 from .newton import Newton
 
@@ -73,8 +73,8 @@ class BayHess:
     """
 
     def __init__(self, n_dim, strong_conv=0., smooth=1e10,
-                 penal=1e-4, tol=1e-6, verbose=False, homotopy_steps=6,
-                 yk_err_tol=0.7, reg_param=1e-4, finite=False,
+                 penal=1e-2, tol=1e-6, verbose=False, homotopy_steps=6,
+                 yk_err_tol=0.7, reg_param=1e-2, finite=False,
                  pairs_to_use=None,
                  data_size=None, sigma_constant=1e-3, cg_tol=1e-2,
                  homotopy_factor=2, check_curv_error=False, eps_yk=10.,
@@ -163,7 +163,6 @@ class BayHess:
         prior_2 = LogBarrier(self.strong_conv, self.smooth,
                              self.penal * self.homotopy_factor ** self.homotopy_steps)
         post = prior_1 * prior_2 * lkl
-        self.post = post
         opt = Newton(print_func=self.print, ls='backtrack_armijo')
         # opt = Newton(print_func=self.print, ls='wolfe_armijo')
         opt.bay = self
@@ -318,7 +317,7 @@ class BayHess:
         if not self.update_inv_flag:
             return self.inv_hess
         self.update_inv_flag = False
-        tol = 1e-4
+        tol = 1e-6
         inv = self.inv_hess.copy()
         res = norm(inv @ self.hess - np.eye(self.n_dim))
         k = 0

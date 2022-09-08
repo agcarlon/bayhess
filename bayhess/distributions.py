@@ -8,6 +8,7 @@ class Distribution:
     Base class of distributions. It implements the combination of distributions
     used to define prior and likelihood distributions.
     """
+
     def __init__(self, log_pdf, grad_log_pdf, hess_log_pdf_action,
                  hess_log_pdf, secant_flag=False):
         self.log_pdf = log_pdf
@@ -63,7 +64,7 @@ class FrobeniusReg(Distribution):
 
     def grad_log_pdf(self, hess):
         aux = 2 * self.weights @ self.weights @ (
-                    hess - self.mean) @ self.weights @ self.weights
+                hess - self.mean) @ self.weights @ self.weights
         return (aux + aux.T) / 2
 
     def hess_log_pdf_action(self, hess, direc):
@@ -151,6 +152,7 @@ class Secant(Distribution):
     Class of distributions of the likelihood of a Hessian given
     curvature pairs using the secant equations.
     """
+
     def __init__(self, sk, yk, pk):
         self.sk = sk
         self.yk = yk
@@ -187,12 +189,10 @@ class Secant(Distribution):
         hess_log_pdf = 0
         for s, y, p in zip(self.sk, self.yk, self.pk):
             hess_log_pdf += np.einsum('in,l,j->ilnj', np.diag(p), s, s)
-        hess_log_pdf = (
-                               hess_log_pdf + np.transpose(hess_log_pdf,
-                                                           (1, 0, 2, 3))) / 2
-        hess_log_pdf = (
-                               hess_log_pdf + np.transpose(hess_log_pdf,
-                                                           (0, 1, 3, 2))) / 2
+        hess_log_pdf = (hess_log_pdf + np.transpose(hess_log_pdf,
+                                                    (1, 0, 2, 3))) / 2
+        hess_log_pdf = (hess_log_pdf + np.transpose(hess_log_pdf,
+                                                    (0, 1, 3, 2))) / 2
         return hess_log_pdf
 
     def variance_norm(self, hess):
@@ -209,6 +209,7 @@ class SecantInverse(Distribution):
     Class of distributions of the likelihood of an inverse Hessian given
     curvature pairs using the secant equations.
     """
+
     def __init__(self, sk, yk, pk):
         self.sk = sk
         self.yk = yk
@@ -231,7 +232,7 @@ class SecantInverse(Distribution):
         return log_pdf
 
     def grad_log_pdf(self, hess_inv):
-        hess_inv_det = det(hess_inv)
+        # hess_inv_det = det(hess_inv)
         grad_log_pdf = np.zeros((self.n_dim, self.n_dim))
         for s, y, p in zip(self.sk, self.yk, self.pk):
             p_ = p
@@ -252,12 +253,10 @@ class SecantInverse(Distribution):
         for s, y, p in zip(self.sk, self.yk, self.pk):
             p_ = p
             hess_log_pdf += np.einsum('in,l,j->ilnj', np.diag(p_), y, y)
-        hess_log_pdf = (
-                               hess_log_pdf + np.transpose(hess_log_pdf,
-                                                           (1, 0, 2, 3))) / 2
-        hess_log_pdf = (
-                               hess_log_pdf + np.transpose(hess_log_pdf,
-                                                           (0, 1, 3, 2))) / 2
+        hess_log_pdf = (hess_log_pdf + np.transpose(hess_log_pdf,
+                                                    (1, 0, 2, 3))) / 2
+        hess_log_pdf = (hess_log_pdf + np.transpose(hess_log_pdf,
+                                                    (0, 1, 3, 2))) / 2
         return hess_log_pdf
 
     def variance_norm(self, hess):
@@ -277,6 +276,7 @@ class LogBarrier(Distribution):
     determinant approaches lower and upper bounds. It is supported on the
     space of matrices with eigenvalues between the given limits.
     """
+
     def __init__(self, lower, upper, penal):
         self.lower = lower
         self.upper = upper
@@ -323,10 +323,8 @@ class LogBarrier(Distribution):
         aux2 = np.linalg.inv(self.upper * np.eye(n_dim) - hess)
         hess_g = self.penal * np.einsum('in,lj->nlij', aux, aux)
         hess_g += self.penal * np.einsum('in,lj->nlij', aux2, aux2)
-        hess_g = (
-                         hess_g + np.transpose(hess_g, (1, 0, 2, 3))) / 2
-        hess_g = (
-                         hess_g + np.transpose(hess_g, (0, 1, 3, 2))) / 2
+        hess_g = (hess_g + np.transpose(hess_g, (1, 0, 2, 3))) / 2
+        hess_g = (hess_g + np.transpose(hess_g, (0, 1, 3, 2))) / 2
         return hess_g
 
 
@@ -480,7 +478,7 @@ def test_secant_inv():
     sk = xk[1:] - xk[:-1]
     pks = np.random.rand(n_points - 1, n_dim)
 
-    lkl = Secant(sk, yk, pks)
+    lkl = SecantInverse(sk, yk, pks)
     test_derivatives(lkl.log_pdf, lkl.grad_log_pdf, n_dim)
     test_hess_act(lkl.grad_log_pdf, lkl.hess_log_pdf_action, n_dim)
     test_hess(lkl.grad_log_pdf, lkl.hess_log_pdf, n_dim)

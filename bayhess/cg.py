@@ -1,5 +1,6 @@
 import numpy as np
 
+import matplotlib.pyplot as plt
 
 class CGLinear:
     """
@@ -42,7 +43,8 @@ class CGLinear:
         for i in range(iters):
             rk = b - action(x)
             pk = rk
-            for k in range(min(int(dims), 100)):
+            # for k in range(min(int(dims), 1000)):
+            for k in range(int(dims)):
                 act_pk = action(pk)
                 step = (rk * rk).sum() / (pk * act_pk).sum()
                 if np.isnan(step) or step < 0:
@@ -52,13 +54,13 @@ class CGLinear:
                 rk = rk_ - step * act_pk
                 if np.abs(rk).max() < abs_tol:
                     self.print(
-                        f'CG - Ended, k:{k_ + k}, res: {np.abs(rk).max()}')
+                        f'CG - Ended - Success, k:{k_ + k}, res: {np.abs(rk).max()}')
                     self.cost['steps'] = k_ + k
                     return x, True
                 beta = (rk * rk).sum() / (rk_ * rk_).sum()
                 pk = rk + beta * pk
             k_ += k
         self.cost['steps'] = k_ + k
-        self.print(f'CG - Ended, k:{k_ + k}, res: {np.abs(rk).max()}')
+        self.print(f'CG - Ended - Failed, k:{k_ + k}, res: {np.abs(rk).max()}')
         # set_trace()
         return x, False
