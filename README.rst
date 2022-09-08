@@ -5,5 +5,15 @@ The BayHess package uses noisy curvature pairs (noisy gradient differences compu
 
 For a detailed description of the method, convergence analysis and numerical results, check our `manuscript`_ named "Approximating Hessian matrices using Bayesian inference: a new approach for quasi-Newton methods in stochastic optimization". This package can be used with the `MICE`_ estimator.
 
+Install BayHess fro PyPI as
+
+    pip install bayhess
+
+A repository with numerical examples can be found at
+
+https://github.com/agcarlon/bayhess_numerics
+
+
+
 .. _manuscript: https://arxiv.org/abs/2208.00441
 .. _MICE: https://pypi.org/project/mice/
