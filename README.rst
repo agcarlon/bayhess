@@ -17,7 +17,7 @@ And, finally, computing the Hessian approximation is done by
 
 >>> hess = bay.find_hess()
 
-Install BayHess fro PyPI as
+Install BayHess from PyPI as
 
 >>> pip install bayhess
 
